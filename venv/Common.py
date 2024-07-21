@@ -19,6 +19,18 @@ threshold_individual_values_per_column = 0.0001
 threshold_for_missing_values = 0.01
 # endregion Thresholds
 
+# region Column Names
+columnName_m_onblockdt = "m_onblockdt"
+columnName_m_offblockdt = "m_offblockdt"
+columnName_dep_sched_time = "dep_sched_time"
+columnName_arr_sched_time = "arr_sched_time"
+# endregion Column Names
+
+# region Formats
+datetimeformat = '%Y-%m-%d %H:%M:%S'
+timeformat = '%H:%M'
+# endregion Formats
+
 # region Logging
 # initialize the file name for the log file
 LogFileName = f'Logging\\LogFile_{datetime.datetime.today().strftime("%Y-%m-%d")}.log'
