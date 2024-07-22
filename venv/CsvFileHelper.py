@@ -37,6 +37,13 @@ class CsvFileHelper:
             return data
         except Exception as e:
             raise Exception(f'Error while reading csv file "{filepath}".', e)
+
+    # Export a dataframe to a csv file.
+    def ExportCsvFile(self, df, filepath):
+        if not isinstance(df, pd.DataFrame):
+            raise Exception('Expected pandas data frame.')
+
+        df.to_csv(filepath)
     # endregion Public
 
     # endregion Functions

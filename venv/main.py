@@ -9,6 +9,7 @@ def preprocessData():
         datacleaner.CleanData()
 
         datajoiner = DataJoiner(datacleaner.flightInfoRaw, datacleaner.groundInfoRaw)
+        datajoiner.JoinData()
 
     except Exception as e:
         logging.critical('Error while executing main.', exc_info=e)

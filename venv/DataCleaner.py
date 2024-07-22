@@ -74,11 +74,6 @@ class DataCleaner:
 
         column = df[columnName]
 
-        #for row in df.iterrows():
-        #    val = row[columnName].value
-        #    if(val is None or (isinstance(val, numbers.Number) and math.isnan(val))):
-        #        logging.debug(f'Found gap in column "{columnName}" at line "{row.index()}".')
-
         for rowIndex in range(len(df)):
             val = column.values[rowIndex]
             # if a gap (empty value) is found
