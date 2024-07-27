@@ -12,6 +12,8 @@ exportJoinDataFilePath = 'Export\\joinedData.csv'
 
 csvFileExtension = '.csv'
 
+groundAirport = "East Carmen"
+
 # region Thresholds
 threshold_individual_values_per_column = 0.0001
 
@@ -25,10 +27,17 @@ columnName_m_onblockdt = "m_onblockdt"
 columnName_m_offblockdt = "m_offblockdt"
 columnName_dep_sched_time = "dep_sched_time"
 columnName_arr_sched_time = "arr_sched_time"
+columnName_dep_sched_date = "dep_sched_date"
+columnName_arr_sched_date = "arr_sched_date"
+columnName_dep_ap_sched = "dep_ap_sched"
+columnName_arr_ap_sched = "arr_ap_sched"
+columnName_day_of_origin = "day_of_origin"
+
 # endregion Column Names
 
 # region Formats
 datetimeformat = '%Y-%m-%d %H:%M:%S'
+dateformat = '%Y-%m-%d'
 timeformat = '%H:%M'
 # endregion Formats
 
