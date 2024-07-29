@@ -43,7 +43,7 @@ class DataJoiner:
     def __mergeData(self, columnHeadsForMerge):
 
         logging.debug('Starting to merge data frames for flight info and ground info.')
-        df = pd.merge(self.flightInfo, self.groundInfo, how='outer', on=columnHeadsForMerge, sort=True)
+        df = pd.merge(self.flightInfo, self.groundInfo, how='left', on=columnHeadsForMerge, sort=True)
         #df = df.sort_values('n_x')
 
         # postprocessing: Delete all rows which do not fulfill the following criteria on having been merged solely by columns with the same names
@@ -80,11 +80,10 @@ class DataJoiner:
                     compareDate = self.__convertToDate(arrSchedDateColumn.values[rowIndex])
                 else:
                     continue
-                    #compareDate = self.__convertToDate(arrSchedDateColumn.values[rowIndex])
 
                 deleteRow = compareDate.date() != groundInfoDate.date()
 
-                if(deleteRow):
+                if(deleteRow and False):
                     rowIndezesToDelete.append(rowIndex)
                     rowsDeleted = rowsDeleted + 1
             except Exception as e:
@@ -94,7 +93,7 @@ class DataJoiner:
             logging.info(f'Deleting "{rowsDeleted}" rows in joined data frame, which were not merged correctly.')
             df.drop(index=rowIndezesToDelete, axis=0, inplace=True)
         else:
-            logging.Info('No rows were deleted in joined data frame. All was merged correctly.')
+            logging.info('No rows were deleted in joined data frame. All was merged correctly.')
 
         joinedDFSize = len(df)
         originalSize = len(self.flightInfo)

@@ -33,7 +33,19 @@ columnName_dep_ap_sched = "dep_ap_sched"
 columnName_arr_ap_sched = "arr_ap_sched"
 columnName_day_of_origin = "day_of_origin"
 
+flightInfo_columnNames_to_identify_duplicate_rows = [columnName_dep_ap_sched, columnName_arr_ap_sched,
+                                                     columnName_arr_sched_date, columnName_dep_sched_date,
+                                                     columnName_dep_sched_time, columnName_arr_sched_time]
+groundInfo_columnNames_to_identify_duplicate_rows = ['sched_inbound_arr', 'sched_inbound_dep', 'sched_outbound_dep', 'fn_number']
 # endregion Column Names
+
+# region Column Renaming
+
+columns_to_rename = {
+  "Ac Type Code": "ac_type",
+  "leg_inbound": "leg_no"
+}
+# endregion Column Renaming
 
 # region Formats
 datetimeformat = '%Y-%m-%d %H:%M:%S'

@@ -27,10 +27,57 @@ class DataCleaner:
         self.__removeColumnsWithoutInformation__(self.flightInfoRaw)
         self.__removeColumnsWithoutInformation__(self.groundInfoRaw)
 
+        # rename columns in both dataframes
+        # this is meant for easier merging in the data joiner
+        self.__renameColumns(self.flightInfoRaw)
+        self.__renameColumns(self.groundInfoRaw)
+
+        # remove duplicate rows in both dataframes
+        self.__removeDuplicates(self.flightInfoRaw, Common.flightInfo_columnNames_to_identify_duplicate_rows)
+        self.__removeDuplicates(self.groundInfoRaw, Common.groundInfo_columnNames_to_identify_duplicate_rows)
+
         logging.info(f'Starting to check for gaps in flight info.')
         self.__checkAndDealWithGapsInData(self.flightInfoRaw)
         logging.info(f'Starting to check for gaps in ground info.')
         self.__checkAndDealWithGapsInData(self.groundInfoRaw)
+
+
+    def __removeDuplicates(self, df, columnNamesForIdentifyDuplicates):
+        if not isinstance(df, pd.DataFrame):
+            raise Exception('Expected pandas data frame.')
+
+        bool_results = df.duplicated(keep='last', subset=columnNamesForIdentifyDuplicates)
+
+        #duplicate_count = bool_results.count(True)
+        duplicate_count = sum(bool(x) for x in bool_results)
+
+        if(duplicate_count > 0):
+            logging.info(f'Found "{duplicate_count}" duplicates. Starting to remove these duplicates.')
+            indezes = []
+
+            for i in range(len(bool_results)):
+                if bool_results[i] == True:
+                    indezes.append(i)
+
+            df.drop(axis=0, index=indezes, inplace=True)
+            logging.info(f'Successfully removed "{duplicate_count}" duplicate rows.')
+
+
+    # Renames columns in given dataframe by the Common.columns_to_rename dictionary.
+    def __renameColumns(self, df):
+        if not isinstance(df, pd.DataFrame):
+            raise Exception('Expected pandas data frame.')
+
+        dfColumnNames = df.columns
+
+        for columnName in Common.columns_to_rename:
+            renameColumnName = Common.columns_to_rename[columnName]
+
+            for dfColumnName in dfColumnNames:
+                if dfColumnName == columnName:
+                    logging.debug(f'Renaming column "{dfColumnName}" to "{renameColumnName}".')
+                    df.rename(mapper={dfColumnName: renameColumnName}, inplace=True, axis=1)
+
 
     # This method identifies gaps in the data and removes (if necessary) inconsistent data
     def __checkAndDealWithGapsInData(self, df):
