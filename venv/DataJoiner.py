@@ -12,6 +12,8 @@ class DataJoiner:
     __csvFileHelper = None
     flightInfo = None
     groundInfo = None
+
+    joinedData = None
     # endregion Fields
 
     # region Constructor
@@ -30,14 +32,18 @@ class DataJoiner:
         logging.debug('Starting to join the flight and ground info.')
 
         columnsForMerge = self.__getColumnNamesForMerge()
-        logging.debug(f'Using the following columns for merging of both dataframes: "{(columnsForMerge)}')
+        logging.debug(f'Using the following columns for merging of both dataframes: "{(columnsForMerge)}"')
 
         logging.info('Starting merge of data sets.')
-        resultdataframe = self.__mergeData(columnsForMerge)
+        self.joinedData = self.__mergeData(columnsForMerge)
 
         filepath = Common.exportJoinDataFilePath
         logging.debug(f'Export joined data to csv file "{filepath}".')
-        self.__csvFileHelper.ExportCsvFile(resultdataframe, filepath)
+
+        try:
+            self.__csvFileHelper.ExportCsvFile(self.joinedData, filepath)
+        except Exception as e:
+            logging.error(f'Unable to export joined data to csv file "{filepath}".', e)
 
     # Merges the flight info and the ground info together and returns the joined data frame.
     def __mergeData(self, columnHeadsForMerge):
