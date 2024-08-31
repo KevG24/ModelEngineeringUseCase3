@@ -7,7 +7,8 @@ import pathlib
 
 flightInfoFilePath = '..\\Rohdaten\\flight_information.csv'
 groundInfoFilePath = '..\\Rohdaten\\ground_information.csv'
-exportJoinDataFilePath = 'Export\\joinedData.csv'
+exportedJoinDataFilePath = 'Export\\joinedData.csv'
+transformedDataFilePath = 'Export\\transformedData.csv'
 # endregion File Paths
 
 csvFileExtension = '.csv'

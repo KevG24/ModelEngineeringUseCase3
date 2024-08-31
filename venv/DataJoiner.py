@@ -37,7 +37,7 @@ class DataJoiner:
         logging.info('Starting merge of data sets.')
         self.joinedData = self.__mergeData(columnsForMerge)
 
-        filepath = Common.exportJoinDataFilePath
+        filepath = Common.exportedJoinDataFilePath
         logging.debug(f'Export joined data to csv file "{filepath}".')
 
         try:
