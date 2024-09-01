@@ -5,6 +5,7 @@ import Common
 import pandas as pd
 import logging
 import numpy
+from Common import columns_to_merge
 from scipy.stats import entropy
 import math
 from CsvFileHelper import CsvFileHelper
@@ -41,14 +42,17 @@ class DataCleaner:
         logging.info(f'Starting to check for gaps in ground info.')
         self.__checkAndDealWithGapsInData(self.groundInfoRaw)
 
+        logging.info('Checking for columns to merge in flight info.')
+        self.__mergeColumns(self.flightInfoRaw)
+        logging.info('Checking for columns to merge in ground info.')
+        self.__mergeColumns(self.groundInfoRaw)
+
 
     def __removeDuplicates(self, df, columnNamesForIdentifyDuplicates):
         if not isinstance(df, pd.DataFrame):
             raise Exception('Expected pandas data frame.')
 
         bool_results = df.duplicated(keep='last', subset=columnNamesForIdentifyDuplicates)
-
-        #duplicate_count = bool_results.count(True)
         duplicate_count = sum(bool(x) for x in bool_results)
 
         if(duplicate_count > 0):
@@ -62,6 +66,44 @@ class DataCleaner:
             df.drop(axis=0, index=indezes, inplace=True)
             logging.info(f'Successfully removed "{duplicate_count}" duplicate rows.')
 
+    # merges columns together by the columns_to_merge dict in Common.py
+    def __mergeColumns(self, df):
+        if not isinstance(df, pd.DataFrame):
+            raise Exception('Expected pandas data frame.')
+
+        columns_to_merge_dict = {}
+        # check if any columns to merge exist in this dataframe
+        for column in Common.columns_to_merge:
+            if(column in df.columns and Common.columns_to_merge[column] in df.columns):
+                columns_to_merge_dict.update({column: Common.columns_to_merge[column]})
+
+        # if no columns found to merge, skip here
+        if(len(columns_to_merge_dict) == 0):
+            logging.info('No columns found to merge. Skipping merge.')
+            return
+
+        logging.info(f'Found columns to merge: "{columns_to_merge_dict}".')
+        logging.info('Starting merge of columns.')
+
+        # reset index here to prevent out-of-bound-exception on data frame iterrows()
+        df.reset_index(drop=True, inplace=True)
+
+        # iter through all rows to merge the values of the merge columns
+        for index, row in df.iterrows():
+            for mergeColumn in columns_to_merge_dict:
+                mergeColumnToRemove = columns_to_merge_dict[mergeColumn]
+                try:
+                    # put the value of mergeColumn together with the mergeColumnToRemove
+                    # the column of mergeColumnToRemove is later to be removed entirely
+                    newValue = row[mergeColumn] + Common.colums_to_merge_value_separator + row[mergeColumnToRemove]
+                    df[mergeColumn].values[index] = newValue
+                except:
+                    logging.error(f'Error while merging columns "{mergeColumn}" and "{mergeColumnToRemove}" on row index "{index}".')
+                    raise
+
+        # drop all merged columns, which were marked as to be removed, 'mergeColumnToRemove'
+        for mergeColumn in columns_to_merge_dict:
+            df.drop(columns_to_merge_dict[mergeColumn], axis=1, inplace=True)
 
     # Renames columns in given dataframe by the Common.columns_to_rename dictionary.
     def __renameColumns(self, df):

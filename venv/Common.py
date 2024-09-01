@@ -38,6 +38,9 @@ flightInfo_columnNames_to_identify_duplicate_rows = [columnName_dep_ap_sched, co
                                                      columnName_arr_sched_date, columnName_dep_sched_date,
                                                      columnName_dep_sched_time, columnName_arr_sched_time]
 groundInfo_columnNames_to_identify_duplicate_rows = ['sched_inbound_arr', 'sched_inbound_dep', 'sched_outbound_dep', 'fn_number']
+columns_to_merge = {columnName_dep_sched_date: columnName_dep_sched_time,
+                    columnName_arr_sched_date: columnName_arr_sched_time}
+colums_to_merge_value_separator = ' '
 # endregion Column Names
 
 # region Column Renaming

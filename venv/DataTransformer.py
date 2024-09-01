@@ -81,8 +81,8 @@ class DataTransformer:
 
             # if val is none, increase row index till you find a valid value to examine
             while(val is None or (isinstance(val, numbers.Number) and math.isnan(val)) and rowIndex < len(columnData)):
-                rowIndex = rowIndex + 1
                 val = columnData[rowIndex]
+                rowIndex = rowIndex + 1
 
             # check the value for its data type and enhance the counter of the corresponding dict key value pair
             if (self.__isFloat(val)):
@@ -158,6 +158,7 @@ class DataTransformer:
 
     #def __transformDateTimeColumnValues(self):
 
+    # This method transforms the string values to integer values in the raw data
     def __transformStringColumnValues(self, columns=[]):
 
         index = 1
@@ -170,7 +171,7 @@ class DataTransformer:
                 if(val is None):
                     continue
                 intKey = self.__getIntKeyForStringValue(val)
-                self.rawData.at[index, column] = val
+                self.rawData[column].values[index] = intKey
 
         logging.info('Finished transformation of string values.')
 
@@ -187,6 +188,13 @@ class DataTransformer:
         self.__stringValueIntKeyDict.update({stringValue: index})
         return index
 
+    def __transformDateTimeValues(self, columns=[]):
+        if(len(columns) == 0):
+            return
+
+            for index, row in self.rawData.iterrows():
+                for column in columns:
+                    logging.info('temp test')
     # endregion Transform methods
 
     # endregion Methods
