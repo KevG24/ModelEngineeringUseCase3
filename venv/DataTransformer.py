@@ -43,9 +43,13 @@ class DataTransformer:
             logging.debug(f'Identified data type "{datatype}" for column "{columnName}".')
             columnDataTypeDict.update({columnName: datatype})
 
-        stringDataTypeColumnNames = dict((key,value) for key, value in columnDataTypeDict.items() if value == self.stringKey)
+        stringDataTypeColumnNames = list(dict((key,value) for key, value in columnDataTypeDict.items() if value == self.stringKey).keys())
+        datetimeDataTypeColumnNames = list(dict((key, value) for key, value in columnDataTypeDict.items() if value == self.dateTimeKey).keys())
 
-        self.__transformStringColumnValues(list(stringDataTypeColumnNames.keys()))
+        logging.info(f'Starting transformation of string values: "{stringDataTypeColumnNames}".')
+        self.__transformStringColumnValues(stringDataTypeColumnNames)
+        logging.info(f'Starting transformation of date time values: "{datetimeDataTypeColumnNames}".')
+        self.__transformDateTimeValues(datetimeDataTypeColumnNames)
 
         filepath = Common.transformedDataFilePath
         logging.debug(f'Export transformed data to csv file "{filepath}".')
@@ -188,13 +192,58 @@ class DataTransformer:
         self.__stringValueIntKeyDict.update({stringValue: index})
         return index
 
+    # This method transforms date time values to integers.
     def __transformDateTimeValues(self, columns=[]):
         if(len(columns) == 0):
             return
 
-            for index, row in self.rawData.iterrows():
-                for column in columns:
-                    logging.info('temp test')
+        # iter through all rows
+        for index, row in self.rawData.iterrows():
+            # get the min date time as threshold
+            rowMinDateTime = self.__getMinDateTime(row, columns)
+
+            for column in columns:
+                val = row[column]
+                if(self.__isNone(val)):
+                    continue
+                try:
+                    timediff = self.__convertToDateTime(val) - rowMinDateTime
+                    self.rawData[column].values[index] = timediff.seconds
+                except:
+                    logging.error(f'Error while transforming date time value in column "{column}" on row index "{index}".')
+                    raise
+
+        logging.info('Finished transformation of date time values.')
+
+    def __getMinDateTime(self, row, columns=[]):
+        minDateTime = None
+        for column in columns:
+            val = row[column]
+            # check for missing values, skip them
+            if(self.__isNone(val)):
+                continue
+            try:
+                if(minDateTime is None or minDateTime > self.__convertToDateTime(val)):
+                    minDateTime = self.__convertToDateTime(val)
+            except:
+                logging.error(f'Error while getting date time value from column "{column}". The value is "{row[column]}".')
+                raise
+
+        return minDateTime.replace(hour=0, minute=0, second=0, microsecond=0)
+
+    # Converts a given string into a date time.
+    def __convertToDateTime(self, stringValue):
+        try:
+            return datetime.strptime(stringValue, Common.datetimeformat)
+        except:
+            return self.__convertToDate(stringValue)
+
+    # Converts a given string into a date.
+    def __convertToDate(self, stringValue):
+        return datetime.strptime(stringValue, Common.dateformat)
+
+    def __isNone(self, val):
+        return val is None or (isinstance(val, numbers.Number) and math.isnan(val))
     # endregion Transform methods
 
     # endregion Methods

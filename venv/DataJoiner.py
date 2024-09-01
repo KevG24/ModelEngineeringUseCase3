@@ -43,7 +43,7 @@ class DataJoiner:
         try:
             self.__csvFileHelper.ExportCsvFile(self.joinedData, filepath)
         except Exception as e:
-            logging.error(f'Unable to export joined data to csv file "{filepath}".', e)
+            logging.error(f'Unable to export joined data to csv file "{filepath}".', exc_info=e)
 
     # Merges the flight info and the ground info together and returns the joined data frame.
     def __mergeData(self, columnHeadsForMerge):
