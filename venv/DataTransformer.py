@@ -22,6 +22,11 @@ class DataTransformer:
     __csvFileHelper = None
     # endregion Private Fields
 
+    # region Public Fields
+    trainData = []
+    trainTargetData = []
+    # endregion Public Fields
+
     # region Constructor
     def __init__(self, data):
         if not isinstance(data, pd.DataFrame):
@@ -50,15 +55,24 @@ class DataTransformer:
         self.__transformStringColumnValues(stringDataTypeColumnNames)
         logging.info(f'Starting transformation of date time values: "{datetimeDataTypeColumnNames}".')
         self.__transformDateTimeValues(datetimeDataTypeColumnNames)
+        logging.debug('Starting last run to fill all missing values with zeros.')
+        self.__transformMissingValues()
 
         filepath = Common.transformedDataFilePath
         logging.debug(f'Export transformed data to csv file "{filepath}".')
+
+        # split data into data and target data for model training
+        columnNames = self.rawData.columns.tolist()
+        columnNames.remove(Common.columnName_TargetData)
+        # train data contain all values except the value to predict
+        self.trainData = self.rawData[columnNames].to_numpy()
+        # target data contain the value to predict
+        self.trainTargetData = self.rawData[Common.columnName_TargetData].to_numpy()
 
         try:
             self.__csvFileHelper.ExportCsvFile(self.rawData, filepath)
         except Exception as e:
             logging.error(f'Unable to export transformed data to csv file "{filepath}".', e)
-
 
     # region Methods for determining data types
 
@@ -160,8 +174,6 @@ class DataTransformer:
 
     # region Transform methods
 
-    #def __transformDateTimeColumnValues(self):
-
     # This method transforms the string values to integer values in the raw data
     def __transformStringColumnValues(self, columns=[]):
 
@@ -178,6 +190,15 @@ class DataTransformer:
                 self.rawData[column].values[index] = intKey
 
         logging.info('Finished transformation of string values.')
+
+   # This method transforms all missing values to 0.
+    def __transformMissingValues(self):
+        for index, row in self.rawData.iterrows():
+            for column in self.rawData.columns:
+                val = row.loc[column]
+
+                if(val is None or (isinstance(val, numbers.Number) and math.isnan(val))):
+                    self.rawData[column].values[index] = 0
 
     # checks if the given string value already exists in the __stringValueIntKeyDict
     # if so, the value is returned

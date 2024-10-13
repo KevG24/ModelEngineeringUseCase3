@@ -41,6 +41,8 @@ groundInfo_columnNames_to_identify_duplicate_rows = ['sched_inbound_arr', 'sched
 columns_to_merge = {columnName_dep_sched_date: columnName_dep_sched_time,
                     columnName_arr_sched_date: columnName_arr_sched_time}
 colums_to_merge_value_separator = ' '
+
+columnName_TargetData = columnName_m_onblockdt
 # endregion Column Names
 
 # region Column Renaming

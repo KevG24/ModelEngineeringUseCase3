@@ -3,6 +3,8 @@ import Common
 from DataCleaner import DataCleaner
 from DataJoiner import DataJoiner
 from DataTransformer import DataTransformer
+from ModelTrainer import ModelTrainer
+from RandomForestTrainer import RandomForestTrainer
 
 def preprocessData():
     try:
@@ -15,10 +17,20 @@ def preprocessData():
         dataTransformer = DataTransformer(datajoiner.joinedData)
         dataTransformer.transformData()
 
-    except Exception as e:
-        logging.critical('Error while executing main.', exc_info=e)
-    finally:
-        logging.info('Exited program run.')
-    return
+        return dataTransformer.trainData, dataTransformer.trainTargetData
 
-preprocessData()
+    except Exception as e:
+        logging.critical('Error while preprocessing data.', exc_info=e)
+        raise e
+
+def trainModel(data, targetData):
+    try:
+        logging.info('Starting model training.')
+        modelTrainer = RandomForestTrainer(data,targetData)
+        modelTrainer.train()
+    except Exception as e:
+        logging.critical('Error while training model.', exc_info=e)
+
+data, targetData = preprocessData()
+trainModel(data, targetData)
+logging.info('Exited program run.')
