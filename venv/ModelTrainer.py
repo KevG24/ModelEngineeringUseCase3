@@ -3,6 +3,7 @@ from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report
+import logging
 
 class ModelTrainer:
 
@@ -31,6 +32,6 @@ class ModelTrainer:
         y_pred = rf_model.predict(X_test)
         # Evaluate the model
         accuracy = accuracy_score(y_test, y_pred)
-        print(f"Accuracy: {accuracy:.2f}")
+        logging.info(f"Accuracy: {accuracy:.2f}")
         # Print classification report
-        print("\nClassification Report:\n", classification_report(y_test, y_pred, target_names=iris.target_names))
+        logging.info("\nClassification Report:\n", classification_report(y_test, y_pred, target_names=iris.target_names))

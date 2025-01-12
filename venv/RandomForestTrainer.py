@@ -1,9 +1,12 @@
 # Import necessary libraries
+import Common
 from sklearn.datasets import load_iris
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.metrics import accuracy_score, classification_report
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
+import joblib
+import logging
 
 class RandomForestTrainer:
 
@@ -26,9 +29,12 @@ class RandomForestTrainer:
 
         y_pred = model.predict(X_test)
         mse = mean_squared_error(y_test, y_pred)
+        #accuracy = accuracy_score(y_test, y_pred)
         logging.info(f'Mean Squared Error: {mse}')
+        #logging.info(f'Accuracy: {accuracy}')
 
-        # Vorhersagen visualisieren
-        #df_test = df.iloc[len(X_train):]
-        #df_test['Vorhersage'] = y_pred
-        #df_test[['Wert', 'Vorhersage']].plot()
+        # export model and parameter
+        filepath = Common.modelParameterFilePath
+        logging.debug(f'Starting to export model parameters to file {filepath}')
+        joblib.dump(model, filepath)
+        logging.info(f'Model and parameter have been successfully exported to {filepath}')

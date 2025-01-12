@@ -9,6 +9,7 @@ flightInfoFilePath = '..\\Rohdaten\\flight_information.csv'
 groundInfoFilePath = '..\\Rohdaten\\ground_information.csv'
 exportedJoinDataFilePath = 'Export\\joinedData.csv'
 transformedDataFilePath = 'Export\\transformedData.csv'
+modelParameterFilePath = 'Export\\exportedModel.pkl'
 # endregion File Paths
 
 csvFileExtension = '.csv'
