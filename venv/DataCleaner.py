@@ -6,9 +6,11 @@ import pandas as pd
 import logging
 import numpy
 from Common import columns_to_merge
+from numpy.f2py.auxfuncs import throw_error
 from scipy.stats import entropy
 import math
 from CsvFileHelper import CsvFileHelper
+from datetime import datetime, date
 
 class DataCleaner:
     # region Fields
@@ -37,6 +39,8 @@ class DataCleaner:
         self.__removeDuplicates(self.flightInfoRaw, Common.flightInfo_columnNames_to_identify_duplicate_rows)
         self.__removeDuplicates(self.groundInfoRaw, Common.groundInfo_columnNames_to_identify_duplicate_rows)
 
+        self.__removeInconistentRowsForGroundInformation()
+
         logging.info(f'Starting to check for gaps in flight info.')
         self.__checkAndDealWithGapsInData(self.flightInfoRaw)
         logging.info(f'Starting to check for gaps in ground info.')
@@ -46,6 +50,8 @@ class DataCleaner:
         self.__mergeColumns(self.flightInfoRaw)
         logging.info('Checking for columns to merge in ground info.')
         self.__mergeColumns(self.groundInfoRaw)
+
+        self.__performConsistencyCheck()
 
 
     def __removeDuplicates(self, df, columnNamesForIdentifyDuplicates):
@@ -65,6 +71,72 @@ class DataCleaner:
 
             df.drop(axis=0, index=indezes, inplace=True)
             logging.info(f'Successfully removed "{duplicate_count}" duplicate rows.')
+
+    # This method performs consistency checks on the data sets to provide only valid information.
+    def __performConsistencyCheck(self):
+        logging.info('Starting conistency checks on flight and ground info data sets.')
+        self.__performConistencyCheckForFlightInformation()
+        self.__performConistencyCheckForGroundInformation()
+        logging.info('Finished consistency checks.')
+
+    # This method performs consistency checks for flight information data set.
+    def __performConistencyCheckForFlightInformation(self):
+
+        indezes = []
+        for index, row in self.flightInfoRaw.iterrows():
+            try:
+                # check if m_offblockdt is greater than m_onblockdt
+                if(self.__convertToDateTime(row[Common.columnName_m_offblockdt]) >=
+                        self.__convertToDateTime(row[Common.columnName_m_onblockdt])):
+                    logging.debug(f'Detected later off block datetime than on block datetime in row with index [{index}].')
+                    indezes.append(index)
+
+                # check if departure date is equal or greater than arrival date
+                if (self.__convertToDateTime(row[Common.columnName_dep_sched_date], False) >=
+                        self.__convertToDateTime(row[Common.columnName_arr_sched_date], False)):
+                    logging.debug(f'Detected later departure datetime than arrival datetime in row with index [{index}].')
+                    indezes.append(index)
+
+                if (row[Common.columnName_dep_ap_sched] == row[Common.columnName_arr_ap_sched]):
+                    logging.debug(f'Detected equal arrival and departure airport in row with index [{index}].')
+                    indezes.append(index)
+            except:
+                logging.error(f'Error while checking data conistency on row [{index}].')
+                raise
+
+        if(len(indezes) > 0):
+            logging.info(f'Found rows to remove due to inconsistent data (flight information): [{indezes}]')
+            self.groundInfoRaw.drop(axis=0, index=indezes, inplace=True)
+
+    def __performConistencyCheckForGroundInformation(self):
+        indezes = []
+       # for index, row in self.groundInfoRaw.iterrows():
+
+            # check if m_offblockdt is greater than m_onblockdt
+           # if (self.__convertToDateTime(row[Common.columnName_m_offblockdt]) >=
+            #        self.__convertToDateTime(row[Common.columnName_m_offblockdt])):
+             #   logging.debug(f'Detected later off block datetime than on block datetime in row with index [{index}].')
+              #  indezes.append(index)
+
+            #if (self.__convertToDateTime(row[Common.columnName_dep_sched_date]) >=
+             #       self.__convertToDateTime(row[Common.columnName_arr_sched_date])):
+              #  logging.debug(f'Detected later departure datetime than arrival datetime in row with index [{index}].')
+               # indezes.append(index)
+
+        if (len(indezes) > 0):
+            logging.info(f'Found rows to remove due to inconsistent data (ground information): [{indezes}]')
+            self.groundInfoRaw.drop(axis=0, index=indezes, inplace=True)
+
+    # This method removes inconsistent rows from the ground information data set.
+    def __removeInconistentRowsForGroundInformation(self):
+        data = self.groundInfoRaw
+        indezes = []
+        for index, row in data.iterrows():
+
+            if(row[Common.columnName_arr_leg_inbound] != Common.groundAirport):
+                logging.debug(f'Found row with wrong inbound airport on index {index}. Removing row from ground info data set.')
+                indezes.append(index)
+        self.groundInfoRaw.drop(axis=0, index=indezes, inplace=True)
 
     # merges columns together by the columns_to_merge dict in Common.py
     def __mergeColumns(self, df):
@@ -205,7 +277,7 @@ class DataCleaner:
                 columnName = df.columns.tolist()[i]
                 keepColumn = self.__hasColumnInfoToKeep__(column.to_frame())
 
-                if(keepColumn):
+                if(keepColumn & Common.columns_to_remove.__contains__(columnName) == False):
                     logging.info(f'Column "{columnName}" is set to be kept.')
                 else:
                     logging.warn(f'Column "{columnName}" is set to be removed.')
@@ -226,9 +298,18 @@ class DataCleaner:
 
         individual_values = len(entries) / len(data)
 
-        if(individual_values > Common.threshold_individual_values_per_column):
-            return True
-        else:
-            return False
+        return individual_values > Common.threshold_individual_values_per_column
+
+    # Converts a given string into a date time.
+    def __convertToDateTime(self, stringValue, withSeconds = True):
+        try:
+            format = Common.datetimeformat if withSeconds else Common.datetimeformatWithoutSeconds
+            return datetime.strptime(stringValue, format)
+        except:
+            return self.__convertToDate(stringValue)
+
+    # Converts a given string into a date.
+    def __convertToDate(self, stringValue):
+        return datetime.strptime(stringValue, Common.datetimeformatWithoutSeconds)
 
 

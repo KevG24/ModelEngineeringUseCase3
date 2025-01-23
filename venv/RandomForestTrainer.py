@@ -29,9 +29,7 @@ class RandomForestTrainer:
 
         y_pred = model.predict(X_test)
         mse = mean_squared_error(y_test, y_pred)
-        #accuracy = accuracy_score(y_test, y_pred)
         logging.info(f'Mean Squared Error: {mse}')
-        #logging.info(f'Accuracy: {accuracy}')
 
         # export model and parameter
         filepath = Common.modelParameterFilePath

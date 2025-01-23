@@ -34,6 +34,9 @@ columnName_arr_sched_date = "arr_sched_date"
 columnName_dep_ap_sched = "dep_ap_sched"
 columnName_arr_ap_sched = "arr_ap_sched"
 columnName_day_of_origin = "day_of_origin"
+columnName_TLC_trans = "TLC_trans"
+columnName_crew_type_change = "crew_type_change"
+columnName_arr_leg_inbound = "arr_leg_inbound"
 
 flightInfo_columnNames_to_identify_duplicate_rows = [columnName_dep_ap_sched, columnName_arr_ap_sched,
                                                      columnName_arr_sched_date, columnName_dep_sched_date,
@@ -41,6 +44,9 @@ flightInfo_columnNames_to_identify_duplicate_rows = [columnName_dep_ap_sched, co
 groundInfo_columnNames_to_identify_duplicate_rows = ['sched_inbound_arr', 'sched_inbound_dep', 'sched_outbound_dep', 'fn_number']
 columns_to_merge = {columnName_dep_sched_date: columnName_dep_sched_time,
                     columnName_arr_sched_date: columnName_arr_sched_time}
+
+columns_to_remove = {columnName_TLC_trans,
+                     columnName_crew_type_change}
 colums_to_merge_value_separator = ' '
 
 columnName_TargetData = columnName_m_onblockdt
@@ -56,6 +62,7 @@ columns_to_rename = {
 
 # region Formats
 datetimeformat = '%Y-%m-%d %H:%M:%S'
+datetimeformatWithoutSeconds = '%Y-%m-%d %H:%M'
 dateformat = '%Y-%m-%d'
 timeformat = '%H:%M'
 # endregion Formats
