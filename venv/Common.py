@@ -37,6 +37,10 @@ columnName_day_of_origin = "day_of_origin"
 columnName_TLC_trans = "TLC_trans"
 columnName_crew_type_change = "crew_type_change"
 columnName_arr_leg_inbound = "arr_leg_inbound"
+columnName_sched_inbound_dep = "sched_inbound_dep"
+columnName_sched_inbound_arr = "sched_inbound_arr"
+columnName_sched_outbound_dep = "sched_outbound_dep"
+columnName_sched_outbound_arr = "sched_outbound_arr"
 
 flightInfo_columnNames_to_identify_duplicate_rows = [columnName_dep_ap_sched, columnName_arr_ap_sched,
                                                      columnName_arr_sched_date, columnName_dep_sched_date,
