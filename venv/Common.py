@@ -41,6 +41,7 @@ columnName_sched_inbound_dep = "sched_inbound_dep"
 columnName_sched_inbound_arr = "sched_inbound_arr"
 columnName_sched_outbound_dep = "sched_outbound_dep"
 columnName_sched_outbound_arr = "sched_outbound_arr"
+columnName_leg_no = "leg_no"
 
 flightInfo_columnNames_to_identify_duplicate_rows = [columnName_dep_ap_sched, columnName_arr_ap_sched,
                                                      columnName_arr_sched_date, columnName_dep_sched_date,
@@ -54,6 +55,10 @@ columns_to_remove = {columnName_TLC_trans,
 colums_to_merge_value_separator = ' '
 
 columnName_TargetData = columnName_m_onblockdt
+
+columnNames_to_use_for_numeric_outliers = {'Sched Groundtime',
+                                           'Act Groundtime',
+                                           'catering_duration'}
 # endregion Column Names
 
 # region Column Renaming

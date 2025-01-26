@@ -11,6 +11,7 @@ from scipy.stats import entropy
 import math
 from CsvFileHelper import CsvFileHelper
 from datetime import datetime, date
+import scipy.stats as stats
 
 class DataCleaner:
     # region Fields
@@ -71,6 +72,7 @@ class DataCleaner:
             df.drop(axis=0, index=indezes, inplace=True)
             logging.info(f'Successfully removed "{duplicate_count}" duplicate rows.')
 
+    # region Consistency Checks
     # This method performs consistency checks on the data sets to provide only valid information.
     def __performConsistencyCheck(self):
         logging.info('Starting conistency checks on flight and ground info data sets.')
@@ -108,6 +110,8 @@ class DataCleaner:
             logging.info(f'Found rows to remove due to inconsistent data (flight information): [{indezes}]')
             self.groundInfoRaw.drop(axis=0, index=indezes, inplace=True)
 
+        self.__removeNumericColumnsOutliers(self.flightInfoRaw)
+
     # This method performs consistency checks for ground information data set.
     def __performConistencyCheckForGroundInformation(self):
         indezes = []
@@ -134,6 +138,37 @@ class DataCleaner:
         if (len(indezes) > 0):
             logging.info(f'Found rows to remove due to inconsistent data (ground information): [{indezes}]')
             self.groundInfoRaw.drop(axis=0, index=indezes, inplace=True)
+
+        self.__removeNumericColumnsOutliers(self.groundInfoRaw)
+
+    # This method checks numeric columns for outliers
+    def __removeNumericColumnsOutliers(self, dataset):
+
+        indezes = []
+
+        intersection_columnNames = Common.columnNames_to_use_for_numeric_outliers.intersection(dataset.columns)
+        for columnName in intersection_columnNames:
+
+            column = dataset[columnName]
+            if(self.__isDataFrameColumnNumeric(column)):
+                z = numpy.abs(stats.zscore(column))
+
+                z_values_over_threshold = numpy.where(z > 3)
+                if(len(z_values_over_threshold) > 1):
+                    logging.debug(f'Detected [{len(z_values_over_threshold)}] values over z-value 3 in column [{columnName}].')
+                    indezes.append(z_values_over_threshold[0])
+
+        if(len(indezes) > 1):
+            logging.debug(f'Detected [{indezes.count}] rows to be removed due to containing outliers.')
+            dataset.drop(axis=0, index=indezes, inplace=True)
+
+    def __isDataFrameColumnNumeric(self, column):
+        try:
+            pd.to_numeric(column)
+            return True
+        except ValueError:
+            return False
+    # endregion Consistency Checks
 
     # merges columns together by the columns_to_merge dict in Common.py
     def __mergeColumns(self, df):
@@ -189,7 +224,7 @@ class DataCleaner:
                     logging.debug(f'Renaming column "{dfColumnName}" to "{renameColumnName}".')
                     df.rename(mapper={dfColumnName: renameColumnName}, inplace=True, axis=1)
 
-
+    # region Gap Handling
     # This method identifies gaps in the data and removes (if necessary) inconsistent data
     def __checkAndDealWithGapsInData(self, df):
         if not isinstance(df, pd.DataFrame):
@@ -263,6 +298,8 @@ class DataCleaner:
 
                 logging.debug(f'Calculated "{onblockdt}" for missing on_blockdt value in row "{rowIndex}".')
 
+    # endregion Gap Handling
+
     def __removeColumnsWithoutInformation__(self, df):
         if not isinstance(df, pd.DataFrame):
             raise Exception('Expected pandas data frame.')
@@ -297,6 +334,8 @@ class DataCleaner:
 
         return individual_values > Common.threshold_individual_values_per_column
 
+    # region DateTime Conversion
+
     # Converts a given string into a date time.
     def __convertToDateTime(self, stringValue, withSeconds = True):
         try:
@@ -308,5 +347,7 @@ class DataCleaner:
     # Converts a given string into a date.
     def __convertToDate(self, stringValue):
         return datetime.strptime(stringValue, Common.datetimeformatWithoutSeconds)
+
+    # endregion DateTime Conversion
 
 
